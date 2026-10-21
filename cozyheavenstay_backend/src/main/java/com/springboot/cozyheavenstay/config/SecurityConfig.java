@@ -1,7 +1,6 @@
 package com.springboot.cozyheavenstay.config;
 
 import com.springboot.cozyheavenstay.service.MyUserDetailsService;
-import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,6 +75,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,"/api/owner/booking/{bookingId}/complete").hasAuthority("OWNER")
                         //add review after stay
                         .requestMatchers(HttpMethod.POST,"/api/review/booking/{bookingId}/add").hasAuthority("CUSTOMER")
+                        //get all reviews for hotel public
+                        .requestMatchers(HttpMethod.GET,"/api/review/hotel/{hotelId}/all").permitAll()
+                        //get review summary for hotel
+                        .requestMatchers(HttpMethod.GET,"/api/review/hotel/{hotelId}/summary").permitAll()
+                        //view all bookings by admin
+                        .requestMatchers(HttpMethod.GET,"/api/admin/booking/all").hasAuthority("ADMIN")
                 );
 
 

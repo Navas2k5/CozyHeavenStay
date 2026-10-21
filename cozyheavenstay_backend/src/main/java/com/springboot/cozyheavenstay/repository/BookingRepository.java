@@ -46,4 +46,12 @@ public interface BookingRepository extends JpaRepository<Bookings,Long> {
             order by b.id desc
             """)
     List<Bookings> getBookingsByHotelId(Long hotelId,Pageable pageable);
+
+    @Query("""
+            select b from Bookings b
+            where (?1 is null or b.bookingStatus=?1)
+            and (?2 is null or exists (select br.id from BookingRooms br where br.booking.id=b.id and br.room.hotel.id=?2))
+            order by b.id desc
+            """)
+    List<Bookings> dynamicFilterBookings(BookingStatus bookingStatus,Long hotelId,Pageable pageable);
 }

@@ -1,25 +1,28 @@
 package com.springboot.cozyheavenstay.service;
 
 import com.springboot.cozyheavenstay.dto.request.AdminRequestDto;
+import com.springboot.cozyheavenstay.dto.response.AdminBookingResponseDto;
 import com.springboot.cozyheavenstay.dto.response.AdminHotelResponseDto;
+import com.springboot.cozyheavenstay.dto.response.BookingRoomDetailsDto;
 import com.springboot.cozyheavenstay.dto.response.HotelResponseDto;
+import com.springboot.cozyheavenstay.enums.BookingStatus;
 import com.springboot.cozyheavenstay.enums.Role;
 import com.springboot.cozyheavenstay.enums.VerificationStatus;
 import com.springboot.cozyheavenstay.exception.InvalidCallException;
 import com.springboot.cozyheavenstay.exception.ResourceNotFoundException;
 import com.springboot.cozyheavenstay.mapper.AdminMapper;
+import com.springboot.cozyheavenstay.mapper.BookingMapper;
 import com.springboot.cozyheavenstay.mapper.HotelMapper;
-import com.springboot.cozyheavenstay.model.Admin;
-import com.springboot.cozyheavenstay.model.Hotels;
-import com.springboot.cozyheavenstay.model.User;
-import com.springboot.cozyheavenstay.repository.AdminRepository;
-import com.springboot.cozyheavenstay.repository.HotelRepository;
-import com.springboot.cozyheavenstay.repository.UserRepository;
+import com.springboot.cozyheavenstay.model.*;
+import com.springboot.cozyheavenstay.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,6 +33,9 @@ public class AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final HotelRepository hotelRepository;
+    private final BookingRepository bookingRepository;
+    private final PaymentRepository paymentRepository;
+    private final BookingRoomsRepository bookingRoomsRepository;
 
     @Transactional
     public void addAdmin(AdminRequestDto adminRequestDto) {
@@ -67,5 +73,44 @@ public class AdminService {
 
         //save
         hotelRepository.save(hotel);
+    }
+
+    public List<AdminBookingResponseDto> getAllBookings(BookingStatus bookingStatus,Long hotelId, Integer page, Integer size){
+        //validate pagination
+        if(page<0||size<1||size>100)
+            throw new InvalidCallException("Page must ne at least 0, size must be between 1 and 100");
+
+        //validate optional hotel filter
+        if(hotelId!=null){
+            if(hotelId<1){
+                throw new InvalidCallException("Hotel ID must be positive");
+            }
+            if(!hotelRepository.existsById(hotelId))
+                throw new ResourceNotFoundException("Hotel not found");
+        }
+
+        //get filtered bookings
+        Pageable pageable= PageRequest.of(page,size);
+        List<Bookings> bookings=bookingRepository.dynamicFilterBookings(bookingStatus,hotelId,pageable);
+
+        List<AdminBookingResponseDto> response= new ArrayList<>();
+
+        for(Bookings booking:bookings){
+            List<BookingRooms> bookingRooms= bookingRoomsRepository.getRoomsByBookingId(booking.getId());
+
+            if(bookingRooms.isEmpty())
+                throw new InvalidCallException("No rooms found for this booking");
+
+            //all rooms in one booking belongs to the same hotel
+            Hotels hotels=bookingRooms.get(0).getRoom().getHotel();
+
+            List<BookingRoomDetailsDto> rooms = bookingRooms.stream().map(BookingMapper::convertBookingRoomToDto).toList();
+
+            Payments payments=paymentRepository.getPaymentsByBookingId(booking.getId()).orElse(null);
+
+            //map to admin repsonse
+            response.add(BookingMapper.convertEntityToAdminDto(booking,hotels,rooms,payments));
+        }
+        return response;
     }
 }

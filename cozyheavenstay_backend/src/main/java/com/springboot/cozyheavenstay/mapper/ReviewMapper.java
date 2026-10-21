@@ -1,6 +1,7 @@
-package com.springboot.cozyheavenstay.controller;
+package com.springboot.cozyheavenstay.mapper;
 
 import com.springboot.cozyheavenstay.dto.request.ReviewRequestDto;
+import com.springboot.cozyheavenstay.dto.response.PublicReviewResponseDto;
 import com.springboot.cozyheavenstay.dto.response.ReviewResponseDto;
 import com.springboot.cozyheavenstay.model.Reviews;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,15 @@ public class ReviewMapper {
                 review.getRating(),
                 review.getComment(),
                 review.getCreatedAt()
+        );
+    }
+
+    public static PublicReviewResponseDto convertEntityToPublicDto(Reviews reviews){
+        return new PublicReviewResponseDto(
+                reviews.getBooking().getCustomer().getName(),
+                reviews.getRating(),
+                reviews.getComment(),
+                reviews.getCreatedAt()
         );
     }
 }
