@@ -28,11 +28,19 @@ public interface HotelRepository extends JpaRepository<Hotels,Long> {
             """)
     List<Hotels> getAllPendingHotels(VerificationStatus verificationStatus);
 
-
     @Query("""
-            select h from Hotels h
-            where h.verificationStatus=?1
-            and h.hotelStatus=?2
-            """)
-    List<Hotels> getAvailableHotels(VerificationStatus verificationStatus, HotelStatus hotelStatus, Pageable pageable);
+        select h from Hotels h
+        where h.verificationStatus = ?1
+        AND h.hotelStatus = ?2
+        AND (?3 IS NULL OR h.location = ?3)
+        AND (?4 IS NULL OR h.hotelName = ?4)
+        order by h.id desc
+        """)
+    List<Hotels> getAvailableHotels(
+            VerificationStatus verificationStatus,
+            HotelStatus hotelStatus,
+            String location,
+            String hotelName,
+            Pageable pageable
+    );
 }

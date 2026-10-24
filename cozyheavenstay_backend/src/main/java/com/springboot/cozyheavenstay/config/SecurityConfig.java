@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/owner/hotel/all").hasAuthority("OWNER")
                         // Get all pending verification status hotel - viewed by admin
                         .requestMatchers(HttpMethod.GET, "/api/admin/hotel/pending").hasAuthority("ADMIN")
-                        // change cerification status of hotel by admin
+                        // change certification status of hotel by admin
                         .requestMatchers(HttpMethod.PUT, "/api/admin/hotel/verification/{hotelId}").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/owner/hotel/status/{hotelId}").hasAuthority("OWNER")
                         // add room by owner
@@ -81,6 +81,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/review/hotel/{hotelId}/summary").permitAll()
                         //view all bookings by admin
                         .requestMatchers(HttpMethod.GET,"/api/admin/booking/all").hasAuthority("ADMIN")
+                        //get all user by admin
+                        .requestMatchers(HttpMethod.GET,"/api/admin/user/all").hasAuthority("ADMIN")
+                        //change status of user by admin
+                        .requestMatchers(HttpMethod.PUT,"/api/admin/user/{userId}/status").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
                 );
 
 

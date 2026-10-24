@@ -1,5 +1,7 @@
 package com.springboot.cozyheavenstay.service;
 
+import com.springboot.cozyheavenstay.exception.ResourceNotFoundException;
+import com.springboot.cozyheavenstay.model.User;
 import com.springboot.cozyheavenstay.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +18,10 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.loadUserByUsername(username);
+        User user= userRepository.loadUserByUsername(username,true);
+        if(user==null)
+            throw new ResourceNotFoundException("User not found or not active");
+
+        return user;
     }
 }

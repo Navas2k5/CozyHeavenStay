@@ -66,7 +66,7 @@ public class HotelService {
 
     }
 
-    public List<CustomerHotelResponseDto> getAllHotels(Integer page, Integer size) {
+    public List<CustomerHotelResponseDto> getAllHotels(String location, String hotelName,Integer page, Integer size) {
 
         //validate pagination
         if(page<0||size<1||size>100)
@@ -76,7 +76,7 @@ public class HotelService {
         Pageable pageable= PageRequest.of(page,size);
 
         //fetch approved and active hotels
-        List<Hotels> hotels = hotelRepository.getAvailableHotels(VerificationStatus.APPROVED,HotelStatus.ACTIVE,pageable);
+        List<Hotels> hotels = hotelRepository.getAvailableHotels(VerificationStatus.APPROVED,HotelStatus.ACTIVE,location,hotelName,pageable);
 
         //convert to customerHotel dto
         return hotels.stream().map(HotelMapper::convertEntityToCustomerHotelResponseDto).toList();

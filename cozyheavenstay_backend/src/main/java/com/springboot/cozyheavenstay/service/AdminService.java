@@ -1,10 +1,7 @@
 package com.springboot.cozyheavenstay.service;
 
 import com.springboot.cozyheavenstay.dto.request.AdminRequestDto;
-import com.springboot.cozyheavenstay.dto.response.AdminBookingResponseDto;
-import com.springboot.cozyheavenstay.dto.response.AdminHotelResponseDto;
-import com.springboot.cozyheavenstay.dto.response.BookingRoomDetailsDto;
-import com.springboot.cozyheavenstay.dto.response.HotelResponseDto;
+import com.springboot.cozyheavenstay.dto.response.*;
 import com.springboot.cozyheavenstay.enums.BookingStatus;
 import com.springboot.cozyheavenstay.enums.Role;
 import com.springboot.cozyheavenstay.enums.VerificationStatus;
@@ -108,9 +105,31 @@ public class AdminService {
 
             Payments payments=paymentRepository.getPaymentsByBookingId(booking.getId()).orElse(null);
 
-            //map to admin repsonse
+            //map to admin response
             response.add(BookingMapper.convertEntityToAdminDto(booking,hotels,rooms,payments));
         }
         return response;
+    }
+
+    public List<AdminUserResponseDto> getAllUsers(Role role,Integer page,Integer size){
+        if(page<0||size<1||size>100)
+            throw new InvalidCallException("Page must ne at least 0, size must be between 1 and 100");
+
+        Pageable pageable=PageRequest.of(page,size);
+        return userRepository.getUserForAdmin(List.of(Role.CUSTOMER,Role.OWNER),role,pageable)
+                .stream().map(AdminMapper::convertUserToDto).toList();
+
+    }
+
+    public AdminUserResponseDto updateUserStatus(Long userId,boolean active){
+        //find user
+        User user= userRepository.findById(userId).orElseThrow(()->
+                new ResourceNotFoundException("User not found"));
+
+        //update account status
+        user.setActive(active);
+        userRepository.save(user);
+
+        return AdminMapper.convertUserToDto(user);
     }
 }

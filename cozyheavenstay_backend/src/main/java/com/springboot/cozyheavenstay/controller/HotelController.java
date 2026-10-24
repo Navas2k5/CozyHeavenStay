@@ -32,9 +32,11 @@ public class HotelController {
     }
 
     @GetMapping("/api/hotel/all")
-    public List<CustomerHotelResponseDto> getAllHotels(@RequestParam(name = "page",required = false,defaultValue = "0") Integer page,
+    public List<CustomerHotelResponseDto> getAllHotels(@RequestParam(name = "location",required = false) String location,
+                                                       @RequestParam(name = "hotelName", required = false) String hotelName,
+                                                       @RequestParam(name = "page",required = false,defaultValue = "0") Integer page,
                                                        @RequestParam(name = "size",required = false,defaultValue = "10") Integer size){
-        return hotelService.getAllHotels(page,size);
+        return hotelService.getAllHotels(location,hotelName,page,size);
     }
 
     @GetMapping("/api/hotel/{hotelId}")

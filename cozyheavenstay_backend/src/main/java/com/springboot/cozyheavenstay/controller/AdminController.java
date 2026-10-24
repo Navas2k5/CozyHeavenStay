@@ -4,8 +4,10 @@ import com.springboot.cozyheavenstay.dto.request.AdminRequestDto;
 import com.springboot.cozyheavenstay.dto.request.CustomerRequestDto;
 import com.springboot.cozyheavenstay.dto.response.AdminBookingResponseDto;
 import com.springboot.cozyheavenstay.dto.response.AdminHotelResponseDto;
+import com.springboot.cozyheavenstay.dto.response.AdminUserResponseDto;
 import com.springboot.cozyheavenstay.dto.response.HotelResponseDto;
 import com.springboot.cozyheavenstay.enums.BookingStatus;
+import com.springboot.cozyheavenstay.enums.Role;
 import com.springboot.cozyheavenstay.enums.VerificationStatus;
 import com.springboot.cozyheavenstay.service.AdminService;
 import jakarta.validation.Valid;
@@ -42,5 +44,18 @@ public class AdminController {
                                                  @RequestParam(name="page",required = false,defaultValue = "0")Integer page,
                                                  @RequestParam(name = "size",required = false,defaultValue = "20")Integer size){
         return adminService.getAllBookings(bookingStatus,hotelId,page,size);
+    }
+
+    @GetMapping("/api/admin/user/all")
+    public List<AdminUserResponseDto> getAllUser(@RequestParam(name = "role",required = false)Role role,
+                                                 @RequestParam(name = "page",required = false,defaultValue = "0")Integer page,
+                                                 @RequestParam(name = "size",required = false,defaultValue = "20")Integer size){
+        return adminService.getAllUsers(role, page, size);
+    }
+
+    @PutMapping("/api/admin/user/{userId}/status")
+    public AdminUserResponseDto updateUserStatus(@PathVariable Long userId,
+                                                 @RequestParam(name = "active")boolean active){
+        return adminService.updateUserStatus(userId,active);
     }
 }
